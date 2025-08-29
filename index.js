@@ -53,6 +53,32 @@ http
           break;
         }
 
+      case "POST":
+        if (pathname === "/api/movies") {
+          let body = "";
+
+          // Collect data
+          req.on("data", (chunk) => {
+            body += chunk.toString();
+          });
+
+          // Once all data received
+          req.on("end", () => {
+            try {
+              const newMovie = JSON.parse(body);
+              newMovie.id = movies.length + 1;
+              movies.push(newMovie);
+
+              res.writeHead(201, { "Content-Type": "application/json" });
+              res.end(JSON.stringify(newMovie));
+            } catch (error) {
+              res.writeHead(400, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ error: "Invalid JSON" }));
+            }
+          });
+          break;
+        }
+
       default:
         res.writeHead(404, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Not Found" }));
