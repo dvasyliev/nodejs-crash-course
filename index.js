@@ -19,8 +19,8 @@ let movies = [
  *  - GET: http://localhost:3001/api/movies/{id} (get by ID)
  *  - GET: http://localhost:3001/api/movies?year=1997 (filter by query)
  *  - POST: http://localhost:3001/api/movies (create)
- *  - PUT: http://localhost:3001/api/movies (update)
- *  - DELETE: http://localhost:3001/api/movies (delete)
+ *  - PUT: http://localhost:3001/api/movies/{id} (update)
+ *  - DELETE: http://localhost:3001/api/movies{id} (delete)
  */
 
 http
@@ -71,6 +71,40 @@ http
 
               res.writeHead(201, { "Content-Type": "application/json" });
               res.end(JSON.stringify(newMovie));
+            } catch (error) {
+              res.writeHead(400, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ error: "Invalid JSON" }));
+            }
+          });
+          break;
+        }
+
+      case "PUT":
+        if (pathname.startsWith("/api/movies/")) {
+          const id = parseInt(pathname.split("/")[3], 10);
+          const movieIndex = movies.findIndex((movie) => movie.id === id);
+
+          if (movieIndex === -1) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Movie not found" }));
+            break;
+          }
+
+          let body = "";
+
+          // Collect data
+          req.on("data", (chunk) => {
+            body += chunk.toString();
+          });
+
+          // Once all data received
+          req.on("end", () => {
+            try {
+              const updatedMovie = JSON.parse(body);
+              movies[movieIndex] = { ...movies[movieIndex], ...updatedMovie };
+
+              res.writeHead(201, { "Content-Type": "application/json" });
+              res.end(JSON.stringify(movies[movieIndex]));
             } catch (error) {
               res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ error: "Invalid JSON" }));
