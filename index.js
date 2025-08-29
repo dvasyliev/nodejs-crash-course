@@ -20,7 +20,7 @@ let movies = [
  *  - GET: http://localhost:3001/api/movies?year=1997 (filter by query)
  *  - POST: http://localhost:3001/api/movies (create)
  *  - PUT: http://localhost:3001/api/movies/{id} (update)
- *  - DELETE: http://localhost:3001/api/movies{id} (delete)
+ *  - DELETE: http://localhost:3001/api/movies/{id} (delete)
  */
 
 http
@@ -110,6 +110,23 @@ http
               res.end(JSON.stringify({ error: "Invalid JSON" }));
             }
           });
+          break;
+        }
+
+      case "DELETE":
+        if (pathname.startsWith("/api/movies/")) {
+          const id = parseInt(pathname.split("/")[3], 10);
+          const movieIndex = movies.findIndex((movie) => movie.id === id);
+
+          if (movieIndex === -1) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Movie not found" }));
+            break;
+          }
+
+          movies = movies.filter((movie) => movie.id !== id);
+          res.writeHead(204);
+          res.end();
           break;
         }
 
