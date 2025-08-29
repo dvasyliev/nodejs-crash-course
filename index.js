@@ -10,7 +10,7 @@ let movies = [
   { id: 1, title: "Titanic", year: 1997, genre: "Romance", rating: 7.9 },
   { id: 2, title: "Avatar", year: 2009, genre: "Sci-Fi", rating: 7.8 },
   { id: 3, title: "Shrek", year: 2001, genre: "Animation", rating: 7.9 },
-  { id: 4, title: "The Matrix", year: 1999, genre: "Sci-Fi", rating: 8.7 },
+  { id: 4, title: "The Matrix", year: 1997, genre: "Sci-Fi", rating: 8.7 },
 ];
 
 /*
@@ -26,12 +26,30 @@ let movies = [
 http
   .createServer(function (req, res) {
     const baseURL = `http://${req.headers.host}/`;
-    const { pathname } = new URL(req.url, baseURL);
+    const { pathname, search, searchParams } = new URL(req.url, baseURL);
 
-    console.log("Request", req.method, pathname);
+    console.log("Request", req.method, pathname, search, searchParams);
 
     switch (req.method) {
       case "GET":
+        if (pathname === "/api/movies" && !!search) {
+          const year = parseInt(searchParams.get("year"), 10);
+          const filteredMovies = movies.filter((movie) => movie.year === year);
+
+          // Check if movies with that year exist
+          if (filteredMovies.length === 0) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({ error: `Movies for ${year} year not found` })
+            );
+            break;
+          }
+
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify(filteredMovies));
+          break;
+        }
+
         if (pathname === "/api/movies") {
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify(movies));
