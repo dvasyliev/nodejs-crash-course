@@ -38,6 +38,21 @@ http
           break;
         }
 
+        if (pathname.startsWith("/api/movies/")) {
+          const id = parseInt(pathname.split("/")[3], 10);
+          const movieIndex = movies.findIndex((movie) => movie.id === id);
+
+          if (movieIndex === -1) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Movie not found" }));
+            break;
+          }
+
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify(movies[movieIndex]));
+          break;
+        }
+
       default:
         res.writeHead(404, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Not Found" }));
